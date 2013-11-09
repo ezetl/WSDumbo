@@ -16,6 +16,15 @@ sudo dumbo start wsd.py -hadoop /usr/local/hadoop -input hdfs://localhost:54310/
 ```
 dumbo cat count/part* -hadoop /usr/local/hadoop | sort -k2,2nr | awk 'NR > 1 {print $2 " " $3}' > file
 ```
+* Para correr el coocur1
+```
+dumbo start coocur1.py -hadoop /usr/local/hadoop -words count_20000_wiki.dat -input corpus/spanishText_480000_485000.lemma.txt   -output count
+```
+* Si no puede leer el archivo de palabras (words), este comando lo modifica para
+poder definirlo como una lista en python directamente (bastante gaucho, pero esquiva lo de cargar un archivo externo):
+```
+cat count_20000_wiki.dat | awk '{print "\""$1"\"" ","}'  > hola
+```
 ##TIPS
 * Acordarse de correr start-dfs.sh y luego start-mapred.sh.
 * Si el datanode no inició correctamente, probar con:
@@ -28,6 +37,16 @@ dumbo cat count/part* -hadoop /usr/local/hadoop | sort -k2,2nr | awk 'NR > 1 {pr
 hadoop dfs -copyFromLocal ruta_al_archivo hdfs://localhost:54310/user/nombre_de_usuario/carpeta_de_destino/nombre_archivo
 ```
 * Para borrar un archivo del hdsf: hadoop dfs -rmr /user/eze/carpeta
+* Recomiendo definir alias en el bash para que sea mas rapido manejar comandos de hadooop:
+```
+alias startdfs='/usr/local/hadoop/bin/start-dfs.sh'
+alias startmapred='/usr/local/hadoop/bin/start-mapred.sh'
+alias dls='hadoop fs -ls'
+alias drmr='hadoop fs -rmr'
+alias dcfl='hadoop fs -copyFromLocal'
+alias dctl='hadoop fs -copyToLocal'
+alias jps='/usr/java/jdk1.6.0_45/bin/jps'
+```
 
 ## A la hora de instalar/usar hadoop:
 * Bajarse el java de Oracle y agregar su ruta de instalacion a JAVA_HOME en basrc
