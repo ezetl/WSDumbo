@@ -12,6 +12,10 @@
 ```
 sudo dumbo start wsd.py -hadoop /usr/local/hadoop -input hdfs://localhost:54310/user/eze/carpeta_archivos  -output analysis
 ```
+* Para ver los archivos generados
+```
+dumbo cat count/part* -hadoop /usr/local/hadoop | sort -k2,2nr | awk 'NR > 1 {print $2 " " $3}' > file
+```
 ##TIPS
 * Acordarse de correr start-dfs.sh y luego start-mapred.sh.
 * Si el datanode no inició correctamente, probar con:
