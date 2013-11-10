@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import string
+from operator import itemgetter
 SEPARATOR = '\t'
 WORDFILE = 'count_20000_wiki.dat'
 WORDS_LIST = ["el",
@@ -20004,6 +20005,8 @@ WORDS_LIST = ["el",
 "austrasia",
 "avícola"]
 
+WORDS_DIM = WORDS_LIST[:2000]
+
 class Mapper:
     def __init__(self):
         # We only want to build windows with relevant words
@@ -20013,6 +20016,7 @@ class Mapper:
 #        self.words = set(line.strip() for line in f)
 #        f.close()
         self.words = set(WORDS_LIST)
+        self.dims = set(WORDS_DIM)
         # Neighbours to check, we're using 50 words window
         self.neighbs = 25
 
@@ -20029,18 +20033,18 @@ class Mapper:
                     dic = {}
                     right = words[i+1 : min(i+self.neighbs, len(words)-1)+1]
                     left = words[max(0, i-self.neighbs) : i]
-                    for w in right:
-                        if w in self.words:
-                            if dic.get(w, 0)==0:
-                                dic[w] = 1
+                    for wo in right:
+                        if wo in self.dims:
+                            if dic.get(wo, -1)==-1:
+                                dic[wo] = 1
                             else:
-                                dic[w] += 1
-                    for w in left:
-                        if w in self.words:
-                            if dic.get(w, 0)==0:
-                                dic[w] = 1
+                                dic[wo] += 1
+                    for wo in left:
+                        if wo in self.dims:
+                            if dic.get(wo, -1)==-1:
+                                dic[wo] = 1
                             else:
-                                dic[w] += 1
+                                dic[wo] += 1
                     yield w, dic
         else:
             pass
@@ -20049,21 +20053,22 @@ class Reducer:
     def __init__(self):
         # We need this to build the final string containing all
         # coocurrences (even those that are zero).
-        f = open(self.params["words"], "r")
-        self.words = set(line.split()[0] for line in f)
-        f.close()
+#        f = open(self.params["words"], "r")
+#        self.words = set(line.split()[0] for line in f)
+#        f.close()
         self.final_dic = {}
+        self.dims = set(WORDS_DIM)
 
     def __call__(self, key, values):
         for dic in values:
-            for k, v in dic:
-                if final_dic.get(k, 0)==0:
-                    final_dic[k] = v
+            for k, v in dic.iteritems():
+                if self.final_dic.get(k, -1)==-1:
+                    self.final_dic[k] = v
                 else:
-                    final_dic[k] += v
+                    self.final_dic[k] += v
         coocur = ""
-        for elem in self.words:
-            coocur += str(final_dic.get(elem, 0)) + SEPARATOR
+        for elem in self.dims:
+            coocur += str(self.final_dic.get(elem, 0)) + SEPARATOR
         # Yield the first order coocurrence vector of key
         yield key, coocur
 

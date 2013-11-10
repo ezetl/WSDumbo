@@ -18,7 +18,7 @@ dumbo cat count/part* -hadoop /usr/local/hadoop | sort -k2,2nr | awk 'NR > 1 {pr
 ```
 * Para correr el coocur1
 ```
-dumbo start coocur1.py -hadoop /usr/local/hadoop -words count_20000_wiki.dat -input corpus/spanishText_480000_485000.lemma.txt   -output count
+dumbo start coocur1.py -hadoop /usr/local/hadoop -input corpus/spanishText_480000_485000.lemma.txt -output count -memlimit 1073741824
 ```
 * Si no puede leer el archivo de palabras (words), este comando lo modifica para
 poder definirlo como una lista en python directamente (bastante gaucho, pero esquiva lo de cargar un archivo externo):
