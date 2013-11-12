@@ -1,29 +1,37 @@
 # WSDumbo
 
 ## Requerimientos
-* Yo uso hadoop-1.2, la tengo configurada para single node, por motivos de sencillez
+* hadoop-1.2, se recomienda configuracion single node para testeo.
 * Python>=2.7
-* Freeling
+* C++
+* Freeling (para preprocesamiento del corpus)
 * Dumbo
-
+* [redsvd](http://code.google.com/p/redsvd/wiki/English) para calcular SVD.
 ##Estructura general
 * transform_corpus.cpp es un programa sencillo usado para el preprocesamiento de datos, es necesario correrlo sobre los corpus sobre los que se quiera trabajar, pues transforma las palabras a sus formas normales (lemas). De esa forma se puede trabajar con Hadoop sin tener de por medio la pesada librería Freeling.
-* wsd.py está pensado como el main de la implementación del algoritmo de WSD. Para correr Dumbo sobre hadoop y con este archivo, hacer:
-```
-sudo dumbo start wsd.py -hadoop /usr/local/hadoop -input hdfs://localhost:54310/user/eze/carpeta_archivos  -output analysis
-```
+
 * Para ver los archivos generados
 ```
-dumbo cat count/part* -hadoop /usr/local/hadoop | sort -k2,2nr | awk 'NR > 1 {print $2 " " $3}' > file
+dumbo cat /user/eze/count/part* -hadoop /usr/local/hadoop | sort -k2,2nr > coocurrences
 ```
+
 * Para correr el coocur1
 ```
-dumbo start coocur1.py -hadoop /usr/local/hadoop -input corpus/spanishText_480000_485000.lemma.txt -output count -memlimit 1073741824
+/*Reemplazar input por *spanish* para leer de todos los archivos del corpus*/
+dumbo start coocur1.py -hadoop /usr/local/hadoop -input corpus/spanishText_480000_485000.lemma.txt -output count -memlimit 1073741824 -file count_20000_wiki.dat
 ```
 * Si no puede leer el archivo de palabras (words), este comando lo modifica para
-poder definirlo como una lista en python directamente (bastante gaucho, pero esquiva lo de cargar un archivo externo):
+poder definirlo como una lista en python directamente (bastante pedestre, pero evita cargar un archivo externo):
 ```
 cat count_20000_wiki.dat | awk '{print "\""$1"\"" ","}'  > hola
+```
+* Para transformar la matriz de coocurrencias a una matriz de solo numeros (es decir, sacarle las palabras que cartacteriza), hacer:
+```
+cat coocurrences | cut -f2- > coocurrences_nowords
+```
+* Para hacer SVD sobre la matriz de coocurrencias (disminicion de dimensiones a 1/20 del original):
+```
+redsvd -i coocurrences_nowords -o coocurrences_svd -r 200  -m SVD
 ```
 ##TIPS
 * Acordarse de correr start-dfs.sh y luego start-mapred.sh.
