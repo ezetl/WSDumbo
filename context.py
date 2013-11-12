@@ -17,12 +17,16 @@ class Mapper:
         f.close()
 
         f = open(WORDFILE, "r")
-    	self.dims = list(set([f.next().strip() for x in xrange(2000)]))
-    	f.close()
+        self.dims = list(set([f.next().strip() for x in xrange(2000)]))
+        f.close()
 
-    	f = open(COOCURR_SVD_V, "r")
-    	#TODO: armar lista de listas de vectores de contexto
-    	self.contexts = #something
+        f = open(COOCURR_SVD_V, "r")
+        lines = f.read().splitlines()
+        self.ctxs = []
+        for line in lines:
+            aux = [np.float32(elem) for elem in line.split()]
+            aux1 = np.array(aux, dtype=np.float32)
+            self.ctxs.append(aux1)
         # Neighbours to check, we're using 50 words window
         self.neighbs = 25
 
@@ -41,13 +45,13 @@ class Mapper:
                     left = words[max(0, i-self.neighbs) : i]
                     for wo in right:
                         if wo in self.dims:
-                        	context += self.contexts[self.dims.index(wo)]
+                            context += self.contexts[self.dims.index(wo)]
                     for wo in left:
                         if wo in self.dims:
                             context += self.contexts[self.dims.index(wo)]
                     final_context = ""
                     for elem in context:
-                    	final_context += str(elem) + SEPARATOR
+                        final_context += str(elem) + SEPARATOR
                     yield w, final_context
         else:
             pass
