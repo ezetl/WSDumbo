@@ -10,7 +10,7 @@
 ##Estructura general
 * transform_corpus.cpp es un programa sencillo usado para el preprocesamiento de datos, es necesario correrlo sobre los corpus sobre los que se quiera trabajar, pues transforma las palabras a sus formas normales (lemas). De esa forma se puede trabajar con Hadoop sin tener de por medio la pesada librería Freeling.
 
-* Para ver los archivos generados
+* Para ver los archivos generados por una rutina hadoop:
 ```
 dumbo cat /user/eze/count/part* -hadoop /usr/local/hadoop | sort -k2,2nr > coocurrences
 ```
@@ -25,13 +25,17 @@ poder definirlo como una lista en python directamente (bastante pedestre, pero e
 ```
 cat count_20000_wiki.dat | awk '{print "\""$1"\"" ","}'  > hola
 ```
-* Para transformar la matriz de coocurrencias a una matriz de solo numeros (es decir, sacarle las palabras que cartacteriza), hacer:
+* Para transformar la matriz de coocurrencias a una matriz de solo numeros (es decir, sacarle las palabras que caracteriza), hacer:
 ```
 cat coocurrences | cut -f2- > coocurrences_nowords
 ```
 * Para hacer SVD sobre la matriz de coocurrencias (disminicion de dimensiones a 1/20 del original):
 ```
-redsvd -i coocurrences_nowords -o coocurrences_svd -r 200  -m SVD
+redsvd -i coocurrences_nowords -o coocurrences_svd -r 100  -m SVD
+```
+* Para correr la rutina que busca los contexts de cada palabra:
+```
+dumbo start context.py -hadoop /usr/local/hadoop -input corpus/algo -output count -file coocurrences_svd.V -file count_20000_wiki.dat
 ```
 ##TIPS
 * Acordarse de correr start-dfs.sh y luego start-mapred.sh.

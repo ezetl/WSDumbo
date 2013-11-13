@@ -45,10 +45,10 @@ class Mapper:
                     left = words[max(0, i-self.neighbs) : i]
                     for wo in right:
                         if wo in self.dims:
-                            context += self.contexts[self.dims.index(wo)]
+                            context += self.ctxs[self.dims.index(wo)]
                     for wo in left:
                         if wo in self.dims:
-                            context += self.contexts[self.dims.index(wo)]
+                            context += self.ctxs[self.dims.index(wo)]
                     final_context = ""
                     for elem in context:
                         final_context += str(elem) + SEPARATOR
