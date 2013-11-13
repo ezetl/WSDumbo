@@ -57,7 +57,9 @@ class Reducer:
 #        self.words = set(line.split()[0] for line in f)
 #        f.close()
         self.final_dic = {}
-        self.dims = set(WORDS_DIM)
+        f = open(WORDFILE, "r")
+    	self.dims = set([f.next().strip() for x in xrange(2000)])
+    	f.close()
 
     def __call__(self, key, values):
         for dic in values:

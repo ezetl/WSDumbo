@@ -16,6 +16,7 @@ class Mapper:
         self.words = set(line.strip() for line in f)
         f.close()
 
+        # self.dims and self.ctxs have the same order
         f = open(WORDFILE, "r")
         self.dims = list(set([f.next().strip() for x in xrange(2000)]))
         f.close()
