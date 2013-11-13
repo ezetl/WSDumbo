@@ -2,6 +2,8 @@ import sys
 import numpy as np
 import nltk as nl
 from nltk import cluster
+from itertools import groupby
+from operator import itemgetter
 
 def main():
     try:
@@ -27,12 +29,14 @@ def main():
     # Begin clustering
     clusterer = cluster.GAAClusterer(4)
     clusters = clusterer.cluster(only_values, True)
-    f = open("resultados_cluster.dat", "w")
-    # Show data
+    final_clusters = []
     for i, elem in enumerate(clusters):
-        a = "{} : {}".format(contexts[i][0], elem)
-        f.write(a)
-        print(a)
+        final_clusters.append((contexts[i][0], elem))
+    f = open("resultados_cluster.dat", "w")
+    for clus, group in groupby(final_clusters, itemgetter(1)):
+        print str(clus) + ":"
+        for word, clust in group:
+            print word
     f.close()
 if __name__=="__main__":
     main()
