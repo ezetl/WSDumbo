@@ -48,9 +48,6 @@
 \begin{document}
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{\scshape Introducción}
 \begin{frame}
 \title{Divide y discriminarás:\\ Una versión distribuída de discriminación de sentidos}
 \author{
@@ -65,7 +62,11 @@
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}
+\section{\scshape Introducción}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Introducción}
+\begin{frame}{Introducción}
 \begin{itemize}
 \item Disambiguación de palabras: asignación de sentidos a palabras.
 \item Dos subproblemas:
@@ -78,7 +79,8 @@
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}
+\subsection{Introducción}
+\begin{frame}{Introducción}
 \begin{itemize}
 \item Trataré de reproducir el algoritmo de context-group discrimination (Shütze, 1998)
 \item Implementa Sense discrimination. No depende de fuentes de conocimiento externas.
@@ -91,7 +93,8 @@
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}
+\subsection{Introducción}
+\begin{frame}{Introducción}
 \begin{itemize}
 \item La implementación será sobre un sistema distribuído utilizando Hadoop.
 \item ¿Por qué?
@@ -106,7 +109,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{\scshape Context-Group Discrimination}
+\section{\scshape Context-Group}
 \subsection{Context-Group Discrimination}
 
 
@@ -119,11 +122,11 @@
 \end{itemize}
 \item Ejemplo:
 \begin{itemize}
-\item \em{Tenía un vaso de asdf en la mano.}
-\item \em{Se le cayó la botella de asdf al piso.}
-\item \em{Tomó tanto asdf que al final no podía caminar.}
+\item \em Tenía un vaso de asdf en la mano.\em
+\item \em Se le cayó la botella de asdf al piso. \em
+\item \em Tomó tanto asdf que al final no podía caminar.\em
 \end{itemize}
-\item ¿Qué es \em{adsf}?
+\item ¿Qué es \em adsf\em?
 \end{itemize}
 \end{frame}
 
@@ -155,8 +158,8 @@
 \subsection{Word Vectors}
 \begin{frame}{Word Vectors}
 \begin{itemize}
-\item Un Word Vector se construye con los N vecinos de una palabra en el corpus.
-\item Una celda I en el vector representa \# veces de coocurrencia de la palabra con la palabra en la posición I.
+\item Un Word Vector se construye con los \em n\em vecinos de una palabra en el corpus.
+\item Una celda \em i\em en el vector representa \# veces de coocurrencia de la palabra con la palabra en la posición \em i\em.
 \item Mientras más overlap haya entre dos vectores, más similiares serán las palabras que representan.
 \item ¿Qué palabras usar como dimensiones? Elección: elegir las palabras más frecuentes en el corpus.
 \end{itemize}
@@ -189,60 +192,208 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Sense Vectors}
 \begin{frame}{Sense Vectors}
-%\begin{itemize}
-%\item Son grupos de contextos similares.
-%\item Se arman clusters partiendo de TODOS los contextos analizados en el corpus.
-%\item Un Sense Vector es simplemente un centroide de cada uno de esos clusters.
-%\item Para armar los clusters se utiliza Expectation Maximization.
-%\begin{itemize}
-%\item Puede converger a soluciones óptimas locales.
-%\item Es necesario elegir buenos parámetros iniciales, sino puede converger a minimos locales.
-%\item Alternativa: Usar Group-Average agglomerative clustering (GAAC).‎‎
-%\end{itemize}
-%\end{itemize}
+\begin{itemize}
+\item Son grupos de contextos similares.
+\item Se arman clusters partiendo de TODOS los contextos analizados en el corpus.
+\item Un Sense Vector es simplemente un centroide de cada uno de esos clusters.
+\item Para armar los clusters se utiliza EM.
+\begin{itemize}
+\item Puede converger a soluciones óptimas locales.
+\item Es necesario elegir buenos parámetros iniciales, sino puede converger a mínimos locales.
+\item Alternativa: Usar Group-Average agglomerative clustering (GAAC).
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\subsection{Sense Vectors}
+\begin{frame}{Sense Vectors}
+\begin{itemize}
+\item El resultado del clustering depende de la representación de los Context Vectors.
+\begin{itemize}
+\item Se utiliza una transformación del espacio dimensional (Singular Value Descomposition).
+\item SVD encuentra los ejes de mayor variación en el espacio vectorial.
+\item Se representan los Context vectors utilizando solamente estas dimensiones.
+\item Se obtienen mejores mediciones que con los vectores sin reducir.
+\end{itemize}
+\end{itemize}
 \begin{figure}
 \centering
 \includegraphics[scale=0.24, keepaspectratio=True, natwidth=800,natheight=600]{sense_vector.png}
 \end{figure}
 \end{frame}
 
-\subsection{Sense Vectors}
-\begin{frame}{Sense Vectors}
+
+\begin{frame}{Context-Group Discrimination}
+Finalmente...\\
+Para discriminar una ocurrencia \em T \em de una palabra ambigua \em V \em:
 \begin{itemize}
-\item %Hablar de SVD para una mejor representacion
+\item Mapear \em T \em en su correspondiente Context Vector $\vec c$ usando los WV de las palabras de su contexto.
+\item Obtener los Sense Vectors $\vec S_j$ de \em V \em.
+\item Asignar \em T \em al sentido \em j \em cuyo Sense Vector es más cercano a $\vec c$.
 \end{itemize}
 \end{frame}
 
-%Explicar el algoritmo de nuevo con estos nuevos elementos
-%Hablar de mis modificaciones (cosas que hice para que el algoritmo sea mas sencillo)
-%hablar de haddop
-%hablar de la adaptacion a hadoop
-%hablar del preprocesamiento y porque convino hacer eso
-%Evaluacion (????)
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{\scshape Methodology}
-\subsection{frame 1}
-\begin{frame}{frame 1}
-
+\section{\scshape Variantes}
+\subsection{Variantes}
+\begin{frame}{Variantes}
+\begin{itemize}
+\item Se utilizó el Wiki Corpus en español.
+\item Se preprocesó el corpus para dejarlo en forma de lemmas. Esto facilitó el trabajo posterior.
+\item El algoritmo se implementa usando Hadoop. Se busca de esta forma sentar una base a lo que es el procesamiento de grandes cantidades de datos.
+\end{itemize}
 \end{frame}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{frame 1}
-\begin{frame}{frame 1}
+\section{\scshape Hadoop+Dumbo}
+\subsection{Hadoop}
+\begin{frame}{Introducción a Hadoop}
+\begin{itemize}
+\item Es un Framework para aplicaciones distribuídas.
+\item Principalmente proceso de datos a larga escala.
+\item Cuenta con varios módulos:
+\begin{itemize}
+\item Un sistema de archivos distribuídos (HDFS).
+\item Librerías en común.
+\item Plataforma de manejo de recursos.
+\item MapReduce: Un modelo de programación para procesamiento de datos.
+\end{itemize}
+\end{itemize}
+\end{frame}
 
+\begin{frame}{Mapreduce}
+Definir dos funciones:
+\begin{itemize}
+\item Map: toma un valor y devuelve un par (\em key:value\em).
+\begin{itemize}
+\item No requiere estado, por lo tanto es ejecutable en paralelo.
+\item Ej: toma una palabra, y devuelve la longitud (\em key\em) y la palabra misma (\em value\em)
+\end{itemize}
+\item El framework se encarga de agrupar valores con las mismas \em keys\em.
+\item Reduce: toma (\em key:list\_of\_values \em). Devuelve otro par (\em key:value\em).
+\begin{itemize}
+\item Ej: toma un número (\em key \em) y una lista de palabras con esa longitud (\em list\_of\_values\em).
+\item Ej: podría devolver \em key \em y la cantidad de palabras en \em list\_of\_values \em.
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Mapreduce}
+\begin{figure}
+\centering
+\includegraphics[scale=0.5, keepaspectratio=True, natwidth=800,natheight=600]{mapreduce.png}
+\end{figure}
+\end{frame}
+
+
+\begin{frame}{Dumbo}
+\begin{itemize}
+\item MapReduce $\rightarrow$ Java. Pero soporta streaming.
+\item Podemos usar cualquier lenguaje, siempre que lea y escriba en stdin/stdout.
+\item Dumbo: Módulo Python, una especie de API para escribir programas para Hadoop sobre Python.
+\end{itemize}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{\scshape Implementación}
+\subsection{Paso 0}
+\begin{frame}{Paso 0: Preprocesamiento}
+\begin{itemize}
+\item Pequeño programa en C++ para transformar corpus.
+\item Razón: Lento y costoso levantar instancia de Freeling en cada Map.
+\item Al no tener un cluster real, facilita las tareas en los pasos siguientes.
+\end{itemize}
+\end{frame}
+
+\subsection{Paso 1}
+\begin{frame}{Paso 1: Contar Palabras}
+\begin{itemize}
+\item Simple programa MapReduce para contar las ocurrencias de palabras en el corpus.
+\item Se obtienen las 20000 palabras más frecuentes del corpus para analizar.
+\item las primeras 2000 serán usadas como dimensiones también.
+\end{itemize}
+\end{frame}
+
+\subsection{Paso 2}
+\begin{frame}{Paso 2: Contar Coocurrencias}
+\begin{itemize}
+\item Armar Word Vectors en una ventana de 50 palabras
+\item Input: corpus y un archivo que contiene la lista de palabras a analizar.
+\item Las primeras 2000 palabras serán las dimensiones.
+\item Output:
+\begin{itemize}
+\item[Opción 1] por cada coocurrencia, devolver par \em palabra:coocurrencia\em.
+\item[Opción 2] por cada palabra analizada, devolver diccionario de coocurrencias.
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\subsection{Paso 3}
+\begin{frame}{Paso 3: Calcular SVD}
+\begin{itemize}
+\item Sin usar Hadoop.
+\item Se reducen las dimensiones de los WV de 2000 a 100.
+\end{itemize}
+\end{frame}
+
+
+\subsection{Paso 4}
+\begin{frame}{Paso 4: Armar Context Vectors}
+\begin{itemize}
+\item Input: corpus, matriz de coocurrencias.
+\item Se vuelve a recorrer el corpus.
+\item Arma los Context Vector de cada ocurrencia de una palabra, sumando los Word Vectors de las palabras con las que coocurre.
+\end{itemize}
+\end{frame}
+
+
+\subsection{Paso 5}
+\begin{frame}{Paso 4: Armar Clusters de Context Vectors}
+\begin{itemize}
+\item Input: Context Vectors.
+\item Se aglomeran en clusters.
+\item Los centroides de los Clusters son los Sense Vectors.
+\item Guardar esa información $\rightarrow$ Discriminar nuevas palabras por contexto.
+\end{itemize}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{\scshape Bottlenecks}
+\subsection{Bottlenecks}
+\begin{frame}{Bottlenecks}
+\begin{itemize}
+\item Alta tasa de transmisión de datos $\rightarrow$ Muchos paquetes en la red
+\begin{itemize}
+\item Solución: evitar mandar tantos paquetes.
+\end{itemize}
+\item Mal balance de carga en cada nodo $\rightarrow$ Maps más lentos que otros.
+\begin{itemize}
+\item En algunos pasos, evitar analizar palabras con poco poder de discriminación y que son muy frecuentes.
+\end{itemize}
+\item Evitar uso de tantas librerías externas: Freeling.
+\end{itemize}
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{\scshape Results}
-\subsection{Frame 1}
-\begin{frame}{Frame 1}
-
+\section{\scshape Exp}
+\subsection{Evaluación}
+\begin{frame}{Evaluación}
+\begin{itemize}
+\item Ideas:
+\end{itemize}
+\item Evaluar los datos obtenidos sobre un grupo reducido de palabras del lenguaje natural.
+\item Si todo va bien, evaluar con palabras artificiales (\em bananadoor \em).
 \end{frame}
 
 \end{document}
