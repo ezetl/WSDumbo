@@ -1,13 +1,12 @@
 import sys
 import numpy as np
-import nltk as nl
 from nltk import cluster
 from itertools import groupby
 from operator import itemgetter
 
 def main():
     try:
-        f = open("contexts_head.dat", "r")
+        f = open("small_contexts.dat", "r")
         lines = f.read().splitlines()
         f.close()
     except IOError:
@@ -21,13 +20,14 @@ def main():
         word = l[0]
         for v in l[1:]:
             values.append(np.float32(v))
-        contexts.append((word, np.array(values)))
+        if any(values):
+        	contexts.append((word, np.array(values)))
     only_values = []
     for elem in contexts:
         only_values.append(elem[1])
-
+    print "Finish loading files."
     # Begin clustering
-    clusterer = cluster.GAAClusterer(4)
+    clusterer = cluster.GAAClusterer(50)
     clusters = clusterer.cluster(only_values, True)
     final_clusters = []
     for i, elem in enumerate(clusters):
@@ -38,5 +38,15 @@ def main():
         for word, clust in group:
             print word
     f.close()
+    print("Terminado procesamiento. Comenzando con input.")
+    lin = sys.stdin.read()
+    while lin:
+        lin = lin.strip().split()
+        for v in lin:
+            values.append(np.float32(v))
+        lin = np.array(values)
+        print(clusterer.classify(lin))
+        lin = sys.stdin.read()
+
 if __name__=="__main__":
     main()

@@ -30,6 +30,9 @@ class Mapper:
             self.ctxs.append(aux1)
         # Neighbours to check, we're using 50 words window
         self.neighbs = 25
+        self.forbbiden_words = ["el","de","en","y","a","uno","ser","que","se",
+        "su","por","con","para","como","este","o","le","pero","sin","cuando",
+        "alguno","ese","casi","a_partir_de","a_pesar_de","fuera_de"]
 
     def __call__(self, key, value):
         # Hadoop passes file lines as 'value', and each line
@@ -41,7 +44,7 @@ class Mapper:
         can_process = len(words)>0
         if can_process:
             for i, w in enumerate(words):
-                if w in self.words:
+                if w in self.words and w not in self.forbbiden_words:
                     right = words[i+1 : min(i+self.neighbs, len(words)-1)+1]
                     left = words[max(0, i-self.neighbs) : i]
                     for wo in right:
