@@ -11,7 +11,6 @@ Tercer Map Reduce:
     1. 
 
 
-
 idea: contar coocurrencias de todo y al final dejar las primera 2000 por ejemplo(o primera 20000, depende de cuantas haya)
 idea: para hcer lo de arriba, en vez de mandar la palabra y el dict por el streaming, mandar:
 (palabra, count_palabra) \t {"coocurr_word1":count_coocurr, ...}
