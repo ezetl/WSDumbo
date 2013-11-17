@@ -1,0 +1,21 @@
+dumbo-0.21.36-py2.7.egg
+typedbytes-0.3.8-py2.7.egg
+freeling/
+*.pyc
+*~
+*.aux
+*.log
+*.nav
+*.out
+*.pdf
+*.snm
+*.toc
+coocurr/
+count_words/
+wsd (copia).py
+eigen*
+red*
+coocurrences
+coocurrences_nowords
+contexts.dat
+
