@@ -68,6 +68,7 @@
 \subsection{Introducción}
 \begin{frame}{Introducción}
 \begin{itemize}
+\item Trataré de reproducir el algoritmo de context-group discrimination (Shütze, 1998)
 \item Disambiguación de palabras: asignación de sentidos a palabras.
 \item Dos subproblemas:
 \begin{itemize}
@@ -75,19 +76,20 @@
 \item Sense labeling
 \end{itemize}
 \item Nos concentraremos en Sense discrimination.
+\item No depende de fuentes de conocimiento externas.
 \end{itemize}
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Introducción}
 \begin{frame}{Introducción}
-\begin{itemize}
-\item Trataré de reproducir el algoritmo de context-group discrimination (Shütze, 1998)
-\item Implementa Sense discrimination. No depende de fuentes de conocimiento externas.
-\item Aplicaciones:
+Aplicaciones:
 \begin{itemize}
 \item Para algunos problemas de Information Access, sólo es necesario discriminar sentidos.
-\item Ej: Similitud y ranking de documentos; dar ejemplos de sentidos de una palabra para una query ambigua.
+\item Ej:
+\begin{itemize}
+\item Similitud y ranking de documentos.
+\item Dar ejemplos de sentidos de una palabra para una query ambigua.
 \end{itemize}
 \end{itemize}
 \end{frame}
@@ -137,21 +139,12 @@
 \item Agrupar ocurrencias de palabras en clusters.
 \item Cada cluster consiste en palabras con contextos similares.
 \item Palabras, contextos y sentidos son representados en un espacio vectorial.
-\item Para armar Word Vectors, se observan las coocurrencias de una palabra en una ventana de 50 palabras.
-\item Para Context Vectors, se observarán coocurrencias de segundo orden (robustez).
-\item Para Sense Vectors, se aglomeran los Context Vectors en clusters y se obtienen sus centroides.
+\item Word Vectors, Context Vectors, Sense Vectors.
 \end{itemize}
 \end{itemize}
 \end{frame}
 
 
-\begin{frame}{Context-Group Discrimination}
-¿Cómo funciona?
-\begin{figure}
-\centering
-\includegraphics[scale=0.5, keepaspectratio=True, natwidth=800,natheight=600]{basig_design.png}
-\end{figure}
-\end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -224,15 +217,18 @@
 
 
 \begin{frame}{Context-Group Discrimination}
-Finalmente...\\
+¿Cómo funciona?\\
 Para discriminar una ocurrencia \em T \em de una palabra ambigua \em V \em:
 \begin{itemize}
 \item Mapear \em T \em en su correspondiente Context Vector $\vec c$ usando los WV de las palabras de su contexto.
 \item Obtener los Sense Vectors $\vec S_j$ de \em V \em.
 \item Asignar \em T \em al sentido \em j \em cuyo Sense Vector es más cercano a $\vec c$.
 \end{itemize}
+\begin{figure}
+\centering
+\includegraphics[scale=0.4, keepaspectratio=True, natwidth=800,natheight=600]{basig_design.png}
+\end{figure}
 \end{frame}
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -342,6 +338,10 @@ Definir dos funciones:
 \item Sin usar Hadoop.
 \item Se reducen las dimensiones de los WV de 2000 a 100.
 \end{itemize}
+\begin{figure}
+\centering
+\includegraphics[scale=0.4, keepaspectratio=True, natwidth=800,natheight=600]{svd.png}
+\end{figure}
 \end{frame}
 
 
@@ -398,6 +398,19 @@ Definir dos funciones:
 \item Si todo va bien, evaluar con palabras artificiales (\em bananadoor\em).
 \end{itemize}
 \end{itemize}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{\scshape ?}
+\subsection{Preguntas}
+\begin{frame}
+\centering ¿Preguntas?\\
+\centering ¿Sugerencias?\\
+\begin{figure}
+\centering
+\includegraphics[scale=0.5, keepaspectratio=True, natwidth=800,natheight=600]{question.jpeg}
+\end{figure}
 \end{frame}
 
 \end{document}
