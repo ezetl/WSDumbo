@@ -37,6 +37,15 @@ redsvd -i coocurrences_nowords -o coocurrences_svd -r 100  -m SVD
 ```
 dumbo start context.py -hadoop /usr/local/hadoop -input corpus/algo -output count -file coocurrences_svd.V -file count_20000_wiki.dat
 ```
+* Para correr la rutina que arma los clusters
+```
+dumbo start cluster_original.py -hadoop /usr/local/hadoop -input /user/eze/clusters/contexts_noletters.dat -output count -file init_clusters_noletters.dat  -memlimit 2073741824
+```
+
+* Para correr el context_cluster:
+```
+dumbo start context_cluster.py -hadoop /usr/local/hadoop -input /user/eze/corpus/spanishText_10000_15000.lemma.txt -output clusters -file coocurrences_svd.V -file coocurrences_word_order -file count_20000_wiki.dat  -memlimit 2073741824
+```
 ##TIPS
 * Acordarse de correr start-dfs.sh y luego start-mapred.sh.
 * Si el datanode no inició correctamente, probar con:

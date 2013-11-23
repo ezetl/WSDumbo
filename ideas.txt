@@ -1,23 +1,5 @@
-Pasos:
-Primer Map Reduce:
-    1. Contar palabras que ocurren mayor a 100 veces (o otro numero)
-    2. Guardar eso en un archivo
-Segundo Map Reduce:
-    1. En cada mapper, levantar el archivo, y contar las coocurrencias en
-       la ventana siempre y cuando sean de palabras que ocurren mas de
-       100 veces (es decir, esten en el archivo).
-    2. hacer el reducer como se tenia pensado.
-Tercer Map Reduce:
-    1. 
-
-
-idea: contar coocurrencias de todo y al final dejar las primera 2000 por ejemplo(o primera 20000, depende de cuantas haya)
-idea: para hcer lo de arriba, en vez de mandar la palabra y el dict por el streaming, mandar:
-(palabra, count_palabra) \t {"coocurr_word1":count_coocurr, ...}
-En el reducer, hacer la suma de count_
-
-para reducer con strips:
-cuando me llega la lista con todos los dicts, armar uno nuevo  vacio, sobre cada dict que me llego iterar sobre las claves, guardar las claves con los datos en el dict nuevo si no estan, o sumarle el dato a esa clave del dict nuevo si ya está.
-
-
-
+- Para procesar nuevos datos:
+(-correr build_final_clusters para obtener algunos datos sobre si anda bien o no.)
+-hacer un script algo parecido a build_final_clusters, donde se le pase una oracion, calcula el contexto (usando el archivo count_20000_wiki.dat para obtener la lista en orden de palabras, y coocurrences_svd.V para obtener la reduccion de dimensiones de esas palabras. Cada fila de la matriz se corresponde con la palabra en el mismo indice de la lista).
+- Una vez calculado el contexto, calcular el centroide mas cercano con algo parecido a build_final_clusters.
+- Mostrar cada palabra y el conjunto de palabras pertenecientes al cluster.

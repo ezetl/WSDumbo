@@ -13,14 +13,14 @@ class Mapper:
         # We only want to build windows with relevant words
         # The words file ONLY contains words, not counts nor
         # another info
-		f = open(WORDFILE, "r")
-		self.words = set(line.strip() for line in f)
-		f.close()
+        f = open(WORDFILE, "r")
+        self.words = set(line.strip() for line in f)
+        f.close()
 
         # self.dims and self.ctxs have the same order
         f = open(WORDFILE2, "r")
-    	self.dims = set([f.next().strip() for x in xrange(2000)])
-    	f.close()
+        self.dims = list(set([f.next().strip() for x in xrange(2000)]))
+        f.close()
 
         f = open(COOCURR_SVD_V, "r")
         lines = f.read().splitlines()
@@ -50,10 +50,10 @@ class Mapper:
                     left = words[max(0, i-self.neighbs) : i]
                     for wo in right:
                         if wo in self.dims:
-                            context += self.ctxs[self.words.index(wo)]
+                            context += self.ctxs[self.dims.index(wo)]
                     for wo in left:
                         if wo in self.dims:
-                            context += self.ctxs[self.words.index(wo)]
+                            context += self.ctxs[self.dims.index(wo)]
                     final_context = ""
                     for elem in context:
                         final_context += str(elem) + SEPARATOR
@@ -61,11 +61,26 @@ class Mapper:
         else:
             pass
 
+
+class Reducer:
+    def __call__(self, key, values):
+        from nltk.cluster import GAAClusterer
+
+        ctxs = [np.array(elem, dtype=np.float32) for elem in values]
+        word = key
+
+        clusterer = GAAClusterer()
+        clusters = clusterer.cluster(ctxs, True)
+
+        for elem in clusters._centroids:
+            yield word, centroid
+
+
 def runner(job):
     job.additer(Mapper)
 
 def starter(prog):
-	pass
+    pass
 
 if __name__ == "__main__":
     import dumbo
