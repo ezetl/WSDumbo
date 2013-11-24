@@ -18,4 +18,12 @@ red*
 coocurrences
 coocurrences_nowords
 contexts.dat
-
+cluster_centroids.dat
+contexts_noletters.dat
+coocurrences_word_order
+init_clusters.dat
+init_clusters_noletters.dat
+little_clusters.dat
+little_contexts.dat
+minimal_contexts_noletters.dat
+resultados_clusters.dat
