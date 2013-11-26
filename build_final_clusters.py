@@ -1,6 +1,6 @@
 import numpy as np
 
-CLUSTERS_CENTROIDS = 'cluster_centroids.dat'
+CLUSTERS_CENTROIDS = 'clusters_centroids.dat'
 CONTEXTS = 'contexts.dat'
 
 def load_clusters(filename):
@@ -46,15 +46,14 @@ def nearest_cluster_id(clusters, point):
 
 def main():
 	print "Loading files"
-	clusters_centroids = load_clusters(CLUSTERS_CENTROIDS)
+	centroids = load_clusters(CLUSTERS_CENTROIDS)
 	words, contexts = load_contexts(CONTEXTS)
 	print "Finish loading files"
-	print "\n\nCENTROIDES\n"
 	res = {}
 	print "Beggining process"
 	for i, c in enumerate(contexts):
 		w = words[i]
-		index = nearest_cluster_id(clusters_centroids, c)
+		index = nearest_cluster_id(centroids, c)
 		#print index, w
 		if res.get(str(index), 0) == 0:
 			res[str(index)] = [w]

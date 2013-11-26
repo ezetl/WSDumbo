@@ -3,3 +3,11 @@
 -hacer un script algo parecido a build_final_clusters, donde se le pase una oracion, calcula el contexto (usando el archivo count_20000_wiki.dat para obtener la lista en orden de palabras, y coocurrences_svd.V para obtener la reduccion de dimensiones de esas palabras. Cada fila de la matriz se corresponde con la palabra en el mismo indice de la lista).
 - Una vez calculado el contexto, calcular el centroide mas cercano con algo parecido a build_final_clusters.
 - Mostrar cada palabra y el conjunto de palabras pertenecientes al cluster.
+
+
+
+
+
+
+-correr cluster_original en hadoop con init clusters y context.dat de input
+-despues clasificar palabras de context.dat con los centroides calculados en el paso anterior.

@@ -6,7 +6,7 @@ from operator import itemgetter
 
 def main():
     try:
-        f = open("small_contexts.dat", "r")
+        f = open("small_clusters.dat", "r")
         lines = f.read().splitlines()
         f.close()
     except IOError:
@@ -27,7 +27,7 @@ def main():
         only_values.append(elem[1])
     print "Finish loading files."
     # Begin clustering
-    clusterer = cluster.GAAClusterer(50)
+    clusterer = cluster.GAAClusterer(1000)
     clusters = clusterer.cluster(only_values, True)
     final_clusters = []
     for i, elem in enumerate(clusters):
@@ -36,7 +36,10 @@ def main():
     for clus, group in groupby(final_clusters, itemgetter(1)):
         print str(clus) + ":"
         for word, clust in group:
-            print word
+            s = set()
+            s.add(word)
+        for w in s:
+            print w
     f.close()
     print("Terminado procesamiento. Comenzando con input.")
     lin = sys.stdin.read()
