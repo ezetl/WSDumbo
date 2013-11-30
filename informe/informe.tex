@@ -1,0 +1,114 @@
+% This file was converted to LaTeX by Writer2LaTeX ver. 1.0.2
+% see http://writer2latex.sourceforge.net for more info
+\documentclass[10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath} % La American Mathematical Society cre\'o este paquete de "Higher Mathematics".
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{amssymb,amsfonts,textcomp}
+\usepackage{color}
+\usepackage{mathtools}
+\usepackage{courier}
+\usepackage[top=2cm,bottom=2cm,left=2cm,right=2cm,nohead,nofoot]{geometry}
+\usepackage{array}
+\usepackage{hhline}
+\usepackage{hyperref}
+\usepackage{fixltx2e}
+\usepackage{graphicx}
+
+%\sectionfont{\large}
+
+%\usepackage[backend=bibtex]{biblio}
+\usepackage[spanish]{babel}
+\usepackage{cite} % para contraer referencias
+\newcommand\ol[1]{{\setul{-0.9em}{}\ul{#1}}}
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, filecolor=blue, urlcolor=blue}
+% Footnote rule
+\setlength{\skip\footins}{0.119cm}
+\renewcommand\footnoterule{\vspace*{-0.018cm}\setlength\leftskip{0pt}\setlength\rightskip{0pt plus 1fil}\noindent\textcolor{black}{\rule{0.25\columnwidth}{0.018cm}}\vspace*{0.101cm}}
+% Pages styles
+\makeatletter
+\newcommand\ps@Standard{
+  \renewcommand\@oddhead{}
+  \renewcommand\@evenhead{}
+  \renewcommand\@oddfoot{}
+  \renewcommand\@evenfoot{}
+  \renewcommand\thepage{\arabic{page}}
+}
+\makeatother
+\pagestyle{Standard}
+
+\title{\vspace{-15mm}\fontsize{14pt}{10pt}\selectfont\textbf{Una versión distribuída de discriminación de sentidos de palabras}} % Article title
+
+\author{
+\normalsize{Ezequiel Torti L\'opez}\\[2mm] % Your name
+\texttt{ezetl91@gmail.com} % Your email address
+}
+
+\begin{document}
+\maketitle
+\abstract{
+El propósito de este trabajo fue implementar un algoritmo automático de discriminación de sentidos de palabras sobre una arquitectura distribuída. Para ello se trató de reproducir el algoritmo \emph{Context-Group Discrimination} de Shütze \cite{Sh98}, agregando ciertas restricciones para simplificar su desarrollo. Se propuso con este proyecto no solamente profundizar conocimientos en el área del procesamiento del lenguaje natural, sino también comprender y utilizar un sistema distribuído para el análisis de datos, sentando una base para el procesamiento de corpus de gran tamaño.
+}
+\section{Introducción}
+La discriminación de sentidos agrupa palabras en clases según su significado. Es decir, varias palabras con sentidos similares pertenecen a al misma clase.
+En ningún momento de la discriminación de sentidos se requiere etiquetar a los mismos, es decir, definirlos. Simplemente se distinguen, discriminan. Esto hace que no se requieran fuentes de conocimiento externas, como bases de datos o diccionarios, cuyo acceso y procesamiento puede ser costoso y lento. Dado esto, se puede decir que la discriminación de sentidos puede ser implementada de manera automática, pues no requiere de corpus etiquetados o fuentes externas de conocimiento, tareas que requieren mucho trabajo manual.
+Si bien puede parecer poco útil tener palabras agrupadas según sentidos pero sin tener los sentidos mismos, en algunas áreas de Information Retrieval tiene aplicaciones, como por ejemplo, medir la similitud entre archivos y hacer ranking de los mismos para presentar los relevantes sobre los no relevantes. También se podría, por ejemplo, utilizar para hacer mejores interfaces a los usuarios: si un usuario ingresa una consulta, se le podría devolver una lista de palabras que tengan un sentido similar a alguna de la consulta que sea ambigua.
+\\
+En otro plano, en los últimos años comenzó a ser popular un término referido al tratamiento de grandes cantidades de datos: \emph{Big Data}. Con el surgimiento de grandes redes sociales y corporaciones, buscar nuevas formas de procesar las gigantescas cantidades de datos que se generan, y hacerlo lo más rápido posible, es una prioridad. Además, el procesamiento de esos datos es una tarea que en muchas ocasiones está intimamente relacionada con el procesamiento del lenguaje natural.
+Algunas soluciones implican utilizar máquinas de última generación y de alto rendimiento, mientras que otras sacan provecho de máquinas existentes, tal vez no tan potentes, pero que en cantidad pueden obtener buenos resultados.
+Es por eso que tener un cluster de máquinas puede ser provechoso, si se sabe como explotarlo. En este trabajo se propuso implementar un algoritmo de \emph{Discriminación de Sentidos de Palabras} (\emph{Word Sense Discrimination}) sobre una plataforma distribuída, que sea escalable. Es decir, los objetivos fueron entender y comprender un algoritmo de \emph{Word Sense Discrimination} y además aprender a implementarlo de una forma no trivial sacando provecho de la arquitectura de un cluster de computadoras.
+
+\section{Context-Group Discrimination}
+\emph{Context-Group Discrimination} propone clasificar los sentidos de las palabras por las similitudes de los contextos en los que ocurren. Para ello representa palabras, contextos y sentidos en un espacio vectorial (que Shütze denomina \emph{Word Space}). Para construir el contexto en de una palabra, se utilizan las coocurrencias de segundo orden, es decir, se observan las palabras que coocurren con la palabra que coocurre con la palabra ambigua. Está demostrado que se obtienen datos menos dispersos y más precisos con esta técnica.
+\subsection{Word Space}
+A grandes rasgos, el Word Space comprende Word Vectors, Context Vectors y Sense Vectors.
+Un Word Vector contiene información sobre la cantidad de veces que una palabra coocurre con otra. Cada vector representa una palabra y cada \emph{slot} del mismo es una dimension (cada dimension es a su vez una palabra).
+Un Context vector es una suma de Word Vectors, o dicho de otra forma, un \emph{centroide}. Cada vez que ocurre una palabra ambigua, se calcula su Context Vector sumando todos los Word Vectors de las palabras con las que coocurre. Esto es lo que anteriormente se mencionó como coocurrencias de segundo orden.
+Obtenidos los Context Vectors de todo un corpus, se organizan en clusters y se obtienen sus centroides. Esos centroides se llaman Sense Vectors.
+\\
+\\
+Los resultados obtenidos de este algoritmo pueden depender de la forma en que se representen los vectores en el Word Space. Para este proyecto se decidió que los Word Vectors tengan un tamaño fijo de 2000 dimensiones, mientras que el conjunto de palabras analizadas es de 20000. Para la elección de esas palabras, simpelente se tomaron las más frecuentes del corpus.
+Además de esa restricción de tamaño, se aplicó Single Value Descomposition (SVD) a los Word Vectors. La aplicación de SVD ayuda a encontrar los ejes de mayor variación en los vectores y reduce las dimensiones (se utilizó para reducir las dimesiones de 2000 a 100). De esta forma se simplifican las tareas, pues es menos costoso construir clusters de vectores de 100 elementos que de 2000 elementos.
+\subsection{Aplicación}
+Una vez analizado el corpus de entrenamiento, se hace lo siguiente para discriminar una ocurrencia \em T \em de una palabra ambigua \em V \em:
+\begin{enumerate}
+\item Obtener el correspondiente Context Vector $\vec c$ usando los Word Vectors de las palabras de su contexto.
+\item Obtener los Sense Vectors $\vec S_j$ de \em V \em.
+\item Asignar \em T \em al sentido \em j \em cuyo Sense Vector es más cercano a $\vec c$.
+\end{enumerate}
+
+\section{Context-Group Discrimination sobre un sistema distribuído}
+A la hora de implementar el algoritmo sobre una arquitectura distribuída, se eligió el framework \texttt{Hadoop} \cite{Had}.
+Entre otras ventajas que ofrece este framework, hay varias librerías escritas en \texttt{Python} que permiten interacturar con el mismo. En particular, \texttt{Dumbo} \cite{Dum} es una que facilita escribir tareas de \texttt{Hadoop} en \texttt{Python}, de forma que se pudo agilizar el desarrollo y concentrarse en puntos claves del proyecto.
+Se instaló \texttt{Hadoop} en una sola máquina y se lo usó en una configuración de nodo simple. Esto se debe a que no se pudo tener acceso a un cluster real con \texttt{Hadoop} y además a que facilitó las tareas en etapas iniciales y de debuggeo del proyecto.
+\\
+\\
+\subsection{Herramientas y Corpus}
+Se utilizó el corpus en español de Wikipedia, el Wiki Corpus. Su tamaño aproximado ronda los 600 MB.
+Cabe aclarar que si bien se recomienda recurrir a \texttt{Hadoop} y otras plataformas del estilo cuando se quieren procesar varios Gigas (o Teras) de información, la idea del proyecto no era llegar a esas instancias, por lo que un corpus de un tamaño pequeño como el usado resultó adecuado.
+Para el preprocesamiento del corpus se utilizó la librería \texttt{Freeling} \cite{Free}, la mayoría del código se encuentra escrito en \texttt{Python} y para calcular el SVD de los Word Vectors se utilizó un software de terceros, \texttt{redsvd} \cite{Red}.
+\subsection{Preprocesamiento de datos}
+
+\subsection{Paso 1}
+\subsection{Paso 2}
+\subsection{Paso 3}
+\subsection{Paso 4}
+
+\section{Evaluacion y resultados}
+\section{Resultados}
+
+
+\section{Conclusiones}
+
+% Bibliografía.
+%-----------------------------------------------------------------
+\begin{thebibliography}{99}
+
+\bibitem{Sh98} Hinrich Schütze, Automatic Word Sense Discrimination, Computational Linguistics journal - Special issue on word sense disambiguation, Volumen 24, pp. 97-123, 1998.
+\bibitem{Had} \url{http://hadoop.apache.org/}
+\bibitem{Dum} \url{https://github.com/klbostee/dumbo}
+\bibitem{Free} \url{http://nlp.lsi.upc.edu/freeling/}
+\bibitem{Red} \url{http://code.google.com/p/redsvd/wiki/English}
+\end{thebibliography}
+\end{document}
