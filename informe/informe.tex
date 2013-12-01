@@ -1,6 +1,6 @@
 % This file was converted to LaTeX by Writer2LaTeX ver. 1.0.2
 % see http://writer2latex.sourceforge.net for more info
-\documentclass[10pt]{article}
+\documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath} % La American Mathematical Society cre\'o este paquete de "Higher Mathematics".
 \usepackage{float}
@@ -81,19 +81,36 @@ Una vez analizado el corpus de entrenamiento, se hace lo siguiente para discrimi
 \section{Context-Group Discrimination sobre un sistema distribuído}
 A la hora de implementar el algoritmo sobre una arquitectura distribuída, se eligió el framework \texttt{Hadoop} \cite{Had}.
 Entre otras ventajas que ofrece este framework, hay varias librerías escritas en \texttt{Python} que permiten interacturar con el mismo. En particular, \texttt{Dumbo} \cite{Dum} es una que facilita escribir tareas de \texttt{Hadoop} en \texttt{Python}, de forma que se pudo agilizar el desarrollo y concentrarse en puntos claves del proyecto.
-Se instaló \texttt{Hadoop} en una sola máquina y se lo usó en una configuración de nodo simple. Esto se debe a que no se pudo tener acceso a un cluster real con \texttt{Hadoop} y además a que facilitó las tareas en etapas iniciales y de debuggeo del proyecto.
-\\
-\\
+Se instaló \texttt{Hadoop} en una sola máquina y se lo usó en una configuración de nodo simple. Esto se debe a que no se pudo tener acceso a un cluster real con \texttt{Hadoop} y además a que facilitó las tareas en etapas iniciales y de depuración del proyecto.
 \subsection{Herramientas y Corpus}
 Se utilizó el corpus en español de Wikipedia, el Wiki Corpus. Su tamaño aproximado ronda los 600 MB.
 Cabe aclarar que si bien se recomienda recurrir a \texttt{Hadoop} y otras plataformas del estilo cuando se quieren procesar varios Gigas (o Teras) de información, la idea del proyecto no era llegar a esas instancias, por lo que un corpus de un tamaño pequeño como el usado resultó adecuado.
 Para el preprocesamiento del corpus se utilizó la librería \texttt{Freeling} \cite{Free}, la mayoría del código se encuentra escrito en \texttt{Python} y para calcular el SVD de los Word Vectors se utilizó un software de terceros, \texttt{redsvd} \cite{Red}.
 \subsection{Preprocesamiento de datos}
+Se preprocesó el corpus para dejar las palabras en forma de lemas. De esa forma se agilizaron las tareas siguientes, dado que sólo se debía leer de archivos y armar los vectores correspondientes. No contar con la sobrecarga de transformar palabras a lemas en cada ejecución de los pasos fue una gran ayuda, pues tampoco se contaba con un cluster potente sobre el cual correr el algoritmo, y levantar instancias de \texttt{Freeling} y correrlas es muy costoso.
+\subsection{Paso 1: Contar palabras}
+El primer trabajo sobre \texttt{Hadoop} fue simplemente contar ocurrencias de palabras en el corpus. Esto sirvió para elegir las 20000 más frecuentes y analizar sus características después (notar que las 2000 más frecuentes harán también de dimensiones en los Word Vectors).
+\subsection{Paso 2: Contar Coocurrencias}
+El segundo trabajo sobre \texttt{Hadoop} tiene como finalidad armar los Word Vectors de cada una de las 20000 palabras más frecuentes, utilizando una ventana de 25 palabras a cada lado. Es decir, cuenta las coocurrencias de cada palabra.
+Para ello recorre el corpus una segunda vez, y por cada palabra, chequea que pertenezca al conjunto de las palabras analizables y calcula el vector.
+% Si comento cosas de MapReduce, debería agregar lo de:
+%\item[Opción 1] por cada coocurrencia, devolver par \em palabra:coocurrencia\em.
+%\item[Opción 2] por cada palabra analizada, devolver diccionario de coocurrencias.
 
-\subsection{Paso 1}
-\subsection{Paso 2}
-\subsection{Paso 3}
-\subsection{Paso 4}
+
+\subsection{Paso 3: Calcular SVD}
+Una vez obtenida la matriz de coocurrencias, se redujeron las dimensiones aplicando SVD.
+Para este paso no se recurrió a \texttt{Hadoop}, se utilizó \texttt{redsvd} \cite{Red}, 
+Se redujeron de 2000 a 100, lo cual es un buen número y permite un cálculo más rápido de Context y Sense Vectors.
+%Cuando hable de Hadoop, mencionar lo del cuello de botella cuando se reducen las dimensiones.
+\subsection{Paso 4: Calcular Context Vectors}
+El tercer trabajo en \texttt{Hadoop} consiste en calcular los Context Vectors. Para ello recorre el corpus por tercera vez, analiza las coocurrencias de cada palabra y suma los Word Vectors de las palabras con las que coocurre. De esa forma construye un \emph{centroide}.
+Se crea un Context Vector para cada ocurrencia de palabras ambiguas en el corpus, por lo que la cantidad de datos generados en este paso es muy grande y es proporcional al tamaño del corpus. 
+\subsection{Paso 5: Construir clusters de Context Vectors}
+Se adaptó el algoritmo de K-means clustering para correrlo como un trabajo de \texttt{Hadoop} y explotar el paralelismo ofrecido.
+En este paso se calculan los centroides de los clusters que se forman con todos los Context Vectors generados en el paso anterior.
+Shütze recomienda utilizar GAAC clustering (\emph{Group-Aglomerative clustering}), que obtiene mejores puntos iniciales que K-means y evita converger a mínimos locales.
+Sin embargo se dejó de lado el intento de implementar este algoritmo y se adaptó una implementación existente al proyecto, obteniendo buenos resultados con una gran cantidad de centroides iniciales.
 
 \section{Evaluacion y resultados}
 \section{Resultados}
