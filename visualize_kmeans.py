@@ -23,7 +23,7 @@ def load_contexts(filename):
         words.append(line.split()[0])
     return words, np.array(ctxt)
 print "Cargando Archivo"
-labels, data = load_contexts('resultados_clusters_con_indices.dat')
+labels, data = load_contexts('resultados_clusters_con_indices_MINIMAL.dat')
 print "Finalizado Cargado de Archivo"
 n_samples, n_features = data.shape
 
@@ -38,22 +38,21 @@ print("n_digits: %d, \t n_samples %d, \t n_features %d"
 
 print(79 * '_')
 print('% 9s' % 'init'
-      '    time  inertia    homo   compl  v-meas     ARI AMI  silhouette')
+      '\thomo\tcompl\tsilhouette\tRI')
 
 
 def bench_k_means(estimator, name, data):
     t0 = time()
     estimator.fit(data)
-    print('% 9s   %.2fs     %.3f   %.3f   %.3f    %.3f'
-          % (name, (time() - t0),
-             metrics.homogeneity_score(labels, estimator.labels_),
+    print('% 9s\t%.3f\t%.3f\t%.3f\t%.3f'
+          % (name, metrics.homogeneity_score(labels, estimator.labels_),
              metrics.completeness_score(labels, estimator.labels_),
-             #metrics.v_measure_score(labels, estimator.labels_),
-             metrics.adjusted_rand_score(labels, estimator.labels_),
-#             metrics.adjusted_mutual_info_score(labels,  estimator.labels_),
              metrics.silhouette_score(data, estimator.labels_,
                                       metric='euclidean',
                                       sample_size=sample_size)))
+             #metrics.v_measure_score(labels, estimator.labels_),
+             metrics.adjusted_rand_score(labels, estimator.labels_),
+#             metrics.adjusted_mutual_info_score(labels,  estimator.labels_),
 
 bench_k_means(KMeans(n_digits, init='k-means++', n_init=10),
               name="k-means++", data=data)
