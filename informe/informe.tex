@@ -110,13 +110,20 @@ Se crea un Context Vector para cada ocurrencia de palabras ambiguas en el corpus
 Se adaptó el algoritmo de K-means clustering para correrlo como un trabajo de \texttt{Hadoop} y explotar el paralelismo ofrecido.
 En este paso se calculan los centroides de los clusters que se forman con todos los Context Vectors generados en el paso anterior.
 Shütze recomienda utilizar GAAC clustering (\emph{Group-Aglomerative clustering}), que obtiene mejores puntos iniciales que K-means y evita converger a mínimos locales.
-Sin embargo se dejó de lado el intento de implementar este algoritmo y se adaptó una implementación existente al proyecto, obteniendo buenos resultados con una gran cantidad de centroides iniciales.
+Sin embargo se decidió adaptar una implementación de K-means existente al proyecto, obteniendo buenos resultados con una gran cantidad de centroides iniciales.
+Finalmente, obtenidos los centroides, se construyeron los clusters según los pasos descriptos en la Sección 2.2.
 
-\section{Evaluacion y resultados}
 \section{Resultados}
+Se realizó K-means con 12784 semillas iniciales, y se obtuvo una cantidad similar de centroides de clusters.
+Una vez clasificados todos los contextos obtenidos del corpus, se procedió a analizar la cualidad de los clusters construidos con diversas métricas. Para ello se tomaron submuestras del total y se construyeron clusters nuevamente, comparando los nuevos resultados con los anteriores de acuerdo a cada métrica.
+En el Cuadro 1 se pueden ver los resultados.
+% HABLAR DE CADA METRICA POR SEPARADO Y QUE SIGNIFICA CADA UNA.
 
 
 \section{Conclusiones}
+Se logró implementar en este proyecto un algoritmo de discriminación de sentidos de palabras automático, que no requiere de fuentes de conocimientos externas, y si bien no alcanzó un estado de óptimo funcionamiento, se logró una buena performance del mismo, incluso reemplazando GAAC clusering por K-means clustering.\\
+A pesar de haber hecho algunas simplificaciones en la adaptación del algoritmo y en las mediciones finales respecto al paper original, la modularización de la implementación deja espacio para posibles futuras mejoras.
+Finalmente, se cumplió el objetivo extra de adaptar el algoritmo a una plataforma distribuída. Por el momento su ejecución requiere de un conocimiento amplio del código fuente, pues el desarrollo se centró en la parte funcional, y no tanto en mejorar la interfaz al usuario.
 
 % Bibliografía.
 %-----------------------------------------------------------------

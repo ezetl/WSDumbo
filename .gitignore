@@ -27,3 +27,5 @@ little_clusters.dat
 little_contexts.dat
 minimal_contexts_noletters.dat
 resultados_clusters.dat
+resultados_clusters_con_indices.dat
+seleccion_clusters.dat
