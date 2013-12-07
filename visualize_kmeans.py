@@ -21,14 +21,13 @@ def load_contexts(filename):
         aux1 = np.array(aux, dtype=np.float32)
         ctxt.append(aux1)
         words.append(line.split()[0])
-    return words, ctxt
-
+    return words, np.array(ctxt)
+print "Cargando Archivo"
 labels, data = load_contexts('resultados_clusters_con_indices.dat')
-
+print "Finalizado Cargado de Archivo"
 n_samples, n_features = data.shape
 
 n_digits = len(np.unique(labels))
-
 
 
 sample_size = 300
@@ -45,13 +44,13 @@ print('% 9s' % 'init'
 def bench_k_means(estimator, name, data):
     t0 = time()
     estimator.fit(data)
-    print('% 9s   %.2fs    %i   %.3f   %.3f   %.3f   %.3f   %.3f    %.3f'
-          % (name, (time() - t0), estimator.inertia_,
+    print('% 9s   %.2fs     %.3f   %.3f   %.3f    %.3f'
+          % (name, (time() - t0),
              metrics.homogeneity_score(labels, estimator.labels_),
              metrics.completeness_score(labels, estimator.labels_),
-             metrics.v_measure_score(labels, estimator.labels_),
+             #metrics.v_measure_score(labels, estimator.labels_),
              metrics.adjusted_rand_score(labels, estimator.labels_),
-             metrics.adjusted_mutual_info_score(labels,  estimator.labels_),
+#             metrics.adjusted_mutual_info_score(labels,  estimator.labels_),
              metrics.silhouette_score(data, estimator.labels_,
                                       metric='euclidean',
                                       sample_size=sample_size)))
@@ -59,15 +58,15 @@ def bench_k_means(estimator, name, data):
 bench_k_means(KMeans(n_digits, init='k-means++', n_init=10),
               name="k-means++", data=data)
 
-bench_k_means(KMeans(n_digits, init='random', n_init=10),
-              name="random", data=data)
+#bench_k_means(KMeans(n_digits, init='random', n_init=10),
+#              name="random", data=data)
 
 # in this case the seeding of the centers is deterministic, hence we run the
 # kmeans algorithm only once with n_init=1
-pca = PCA(n_components=n_digits).fit(data)
-bench_k_means(KMeans(n_digits, init=pca.components_, n_init=1),
-              name="PCA-based",
-              data=data)
+#pca = PCA(n_components=n_digits).fit(data)
+#bench_k_means(KMeans(n_digits, init=pca.components_, n_init=1),
+#              name="PCA-based",
+#              data=data)
 print(79 * '_')
 
 ###############################################################################

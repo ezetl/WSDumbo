@@ -82,10 +82,13 @@ Una vez analizado el corpus de entrenamiento, se hace lo siguiente para discrimi
 A la hora de implementar el algoritmo sobre una arquitectura distribuída, se eligió el framework \texttt{Hadoop} \cite{Had}.
 Entre otras ventajas que ofrece este framework, hay varias librerías escritas en \texttt{Python} que permiten interacturar con el mismo. En particular, \texttt{Dumbo} \cite{Dum} es una que facilita escribir tareas de \texttt{Hadoop} en \texttt{Python}, de forma que se pudo agilizar el desarrollo y concentrarse en puntos claves del proyecto.
 Se instaló \texttt{Hadoop} en una sola máquina y se lo usó en una configuración de nodo simple. Esto se debe a que no se pudo tener acceso a un cluster real con \texttt{Hadoop} y además a que facilitó las tareas en etapas iniciales y de depuración del proyecto.
+
+
 \subsection{Herramientas y Corpus}
 Se utilizó el corpus en español de Wikipedia, el Wiki Corpus. Su tamaño aproximado ronda los 600 MB.
 Cabe aclarar que si bien se recomienda recurrir a \texttt{Hadoop} y otras plataformas del estilo cuando se quieren procesar varios Gigas (o Teras) de información, la idea del proyecto no era llegar a esas instancias, por lo que un corpus de un tamaño pequeño como el usado resultó adecuado.
 Para el preprocesamiento del corpus se utilizó la librería \texttt{Freeling} \cite{Free}, la mayoría del código se encuentra escrito en \texttt{Python} y para calcular el SVD de los Word Vectors se utilizó un software de terceros, \texttt{redsvd} \cite{Red}.
+Finalmente, para efectuar métricas de evaluación se utilizaron varias herramientas que provee la librería \texttt{scikitlearn}.
 \subsection{Preprocesamiento de datos}
 Se preprocesó el corpus para dejar las palabras en forma de lemas. De esa forma se agilizaron las tareas siguientes, dado que sólo se debía leer de archivos y armar los vectores correspondientes. No contar con la sobrecarga de transformar palabras a lemas en cada ejecución de los pasos fue una gran ayuda, pues tampoco se contaba con un cluster potente sobre el cual correr el algoritmo, y levantar instancias de \texttt{Freeling} y correrlas es muy costoso.
 \subsection{Paso 1: Contar palabras}
@@ -102,7 +105,7 @@ Para ello recorre el corpus una segunda vez, y por cada palabra, chequea que per
 Una vez obtenida la matriz de coocurrencias, se redujeron las dimensiones aplicando SVD.
 Para este paso no se recurrió a \texttt{Hadoop}, se utilizó \texttt{redsvd} \cite{Red}, 
 Se redujeron de 2000 a 100, lo cual es un buen número y permite un cálculo más rápido de Context y Sense Vectors.
-%Cuando hable de Hadoop, mencionar lo del cuello de botella cuando se reducen las dimensiones.
+%Si hablo de Hadoop, mencionar lo del cuello de botella cuando se reducen las dimensiones.
 \subsection{Paso 4: Calcular Context Vectors}
 El tercer trabajo en \texttt{Hadoop} consiste en calcular los Context Vectors. Para ello recorre el corpus por tercera vez, analiza las coocurrencias de cada palabra y suma los Word Vectors de las palabras con las que coocurre. De esa forma construye un \emph{centroide}.
 Se crea un Context Vector para cada ocurrencia de palabras ambiguas en el corpus, por lo que la cantidad de datos generados en este paso es muy grande y es proporcional al tamaño del corpus. 
@@ -115,24 +118,49 @@ Finalmente, obtenidos los centroides, se construyeron los clusters según los pa
 
 \section{Resultados}
 Se realizó K-means con 12784 semillas iniciales, y se obtuvo una cantidad similar de centroides de clusters.
-Una vez clasificados todos los contextos obtenidos del corpus, se procedió a analizar la cualidad de los clusters construidos con diversas métricas. Para ello se tomaron submuestras del total y se construyeron clusters nuevamente, comparando los nuevos resultados con los anteriores de acuerdo a cada métrica.
+Para obtener métricas y evaluar los clusters obtenidos, se tomaron submuestras de contexts vectors previamente clasificados y se construyeron clusters nuevamente para evaluarlos.
+La librería \texttt{scikitlearn} provee varias métricas para clustering, de las cuales se usaron:
+\begin{itemize}
+\item Homogeneidad: se mide si los clusters contienen datos que pertenecieron a la misma clase anteriormente.
+\item Completitud: un resultado de clustering satisface la completitud si todos los puntos que pertenecesn a una clase son elementos del mismo cluster.
+\item Silueta: se calcula usando la media de la distancia intra-clusters, llamémosle \em a\em (indica alta o baja similitud entre los elementos de un cluster) y la media de la distancia inter-clusters, llamémosle \em b\em (alta o baja similitud entre clusters). El coeficiente de silueta para una muestra se calcula como $(b-a) / max(a,b)$. El mejor valor va a ser el que esté más cercano a 1, mientras que el peor estará cercano a -1. Valores cercanos a 0 indicarán clusters superpuestos.
+\item Rand Index: se mide la similaridad de los clusters nuevos con respecto a los originales. Se puede ver como el porcentaje de decisiones correctas hechas por el algoritmo \cite{WikiClus} \cite{StanClus}.
+\end{itemize}
+\begin{center}
+    \begin{table}[H]\centering\footnotesize
+        \begin{tabular}{| l | l | l | l | l | }
+        \hline
+        Algoritmo & homogeneidad & completitud & silueta & Rand Index \\ \hline
+        K-means &  &  &  & \\ \hline
+        \end{tabular}
+      \caption{Resultados de distintas métricas sobre clusters obtenidos con K-means.}
+    \end{table}
+\end{center}
+Es de esperarse que haya un alto valor en la métrica Silueta, pues se basa en distancias, y K-means optimiza distancias, por lo cual no debería tomarse como una métrica decisiva.
+Si bien no se cuenta con una implementación de GAAC clustering para constrastar, se observan buenos valores para Completitud y Homogeneidad, y Rand Index demuestra que el armado de clusters es consistente.
 En el Cuadro 1 se pueden ver los resultados.
 % HABLAR DE CADA METRICA POR SEPARADO Y QUE SIGNIFICA CADA UNA.
 
 
 \section{Conclusiones}
-Se logró implementar en este proyecto un algoritmo de discriminación de sentidos de palabras automático, que no requiere de fuentes de conocimientos externas, y si bien no alcanzó un estado de óptimo funcionamiento, se logró una buena performance del mismo, incluso reemplazando GAAC clusering por K-means clustering.\\
+Se logró implementar en este proyecto un algoritmo de discriminación de sentidos de palabras automático, que no requiere de fuentes de conocimientos externas. Si bien no alcanzó un estado de óptimo funcionamiento, se logró una buena performance del mismo, incluso reemplazando GAAC clusering por K-means clustering.\\
 A pesar de haber hecho algunas simplificaciones en la adaptación del algoritmo y en las mediciones finales respecto al paper original, la modularización de la implementación deja espacio para posibles futuras mejoras.
 Finalmente, se cumplió el objetivo extra de adaptar el algoritmo a una plataforma distribuída. Por el momento su ejecución requiere de un conocimiento amplio del código fuente, pues el desarrollo se centró en la parte funcional, y no tanto en mejorar la interfaz al usuario.
+
 
 % Bibliografía.
 %-----------------------------------------------------------------
 \begin{thebibliography}{99}
 
 \bibitem{Sh98} Hinrich Schütze, Automatic Word Sense Discrimination, Computational Linguistics journal - Special issue on word sense disambiguation, Volumen 24, pp. 97-123, 1998.
-\bibitem{Had} \url{http://hadoop.apache.org/}
-\bibitem{Dum} \url{https://github.com/klbostee/dumbo}
-\bibitem{Free} \url{http://nlp.lsi.upc.edu/freeling/}
-\bibitem{Red} \url{http://code.google.com/p/redsvd/wiki/English}
+\bibitem{WikiWSI} Wikipedia, Word Sense Induction \url{http://en.wikipedia.org/wiki/Word-sense_induction}
+\bibitem{WikiClus} Wikipedia, Cluster Analysis \url{http://en.wikipedia.org/wiki/Cluster_analysis}
+\bibitem{StanClus} Evaluation of clustering \url{http://nlp.stanford.edu/IR-book/html/htmledition/evaluation-of-clustering-1.html}
+\bibitem{MapRed} Jimmy Lin y Chris Dyer, Data-Intensive Text Processing with MapReduce, 2010 \url{beowulf.csail.mit.edu/18.337-2012/MapReduce-book-final.pdf}
+\bibitem{Had} Página oficial de \texttt{Hadoop} \url{http://hadoop.apache.org/}
+\bibitem{Dum} Página oficial de \texttt{Dumbo} \url{https://github.com/klbostee/dumbo}
+\bibitem{Free} Página oficial de \texttt{Freeling} \url{http://nlp.lsi.upc.edu/freeling/}
+\bibitem{Red} Página oficial de \texttt{redsvd} \url{http://code.google.com/p/redsvd/wiki/English}
+\bibitem{Sk} Página oficial de \texttt{scikitlearn} \url{http://scikit-learn.org/stable/index.html}
 \end{thebibliography}
 \end{document}
