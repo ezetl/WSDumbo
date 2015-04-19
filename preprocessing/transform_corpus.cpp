@@ -9,23 +9,24 @@
 
 #include "freeling.h"
 #include "freeling/morfo/traces.h"
+
 #define DEST_PATH "../corpus/corpus_lemmas/"
+#define CORPUS_PATH "../corpus/wiki_utf8"
 
 using namespace std;
 using namespace freeling;
 namespace fs = boost::filesystem; 
 
 int main (int argc, char **argv) {
-    /***************************************************************************
-        **************************SETUP GENERAL DE FREELING*************************
-        ***************************************************************************/
-    /*Setear con su lenguaje de confianza */
+    /**************************************************************************
+     ***************************FREELING GENERAL SETUP*************************
+     *************************************************************************/
     util::init_locale(L"es_AR.utf8");
     wstring ipath;
     ipath=L"/usr/local/";
     wstring lang=L"/es/";
     wstring path=ipath+L"/share/freeling"+lang;
-    /* Creamos analizadores y un maco_options*/
+    /* Create maco_options and analyzers */
     tokenizer tk(path+L"tokenizer.dat");
     splitter sp(path+L"splitter.dat");
     maco_options opt(L"es");
@@ -39,7 +40,7 @@ int main (int argc, char **argv) {
     opt.DictionarySearch = true;
     opt.ProbabilityAssignment = true;
     opt.NERecognition = true;
-    /* Y ahora los archivos de configuracion de cada modulo*/
+    /* settings files for each module */
     opt.UserMapFile=L"";
     opt.LocutionsFile=path+L"locucions.dat";
     opt.AffixFile=path+L"afixos.dat";
@@ -48,17 +49,19 @@ int main (int argc, char **argv) {
     opt.NPdataFile=path+L"np.dat";
     opt.PunctuationFile=path+L"../common/punct.dat"; 
     opt.QuantitiesFile=path+L"quantities.dat";
-    /*Creamos el analizador con el maco options*/
     maco morfo(opt); 
-    /*Creamos un tagger. Es importante la opcion FORCE_TAGGER, pues 
-    * obliga a poner un tag por palabra*/
+    /* Create a tagger. It is important to set FORCE_TAGGER: it forces
+     * Freeling to put a tag for each word */
     hmm_tagger tagger(path+L"tagger.dat", true, FORCE_TAGGER);
-    /***************************************************************************
-        **********************************FIN SETUP*********************************
-        ***************************************************************************/
-    fs::path targetDir("../corpus/wiki_utf8"); 
+    /**************************************************************************
+     *********************************END SETUP********************************
+     *************************************************************************/
+
+    fs::path targetDir(CORPUS_PATH); 
     fs::directory_iterator it(targetDir), eod;
 
+    /*My corpus was splitted in several files, this may have to be
+     * modified/simplified to fit your needs*/
     BOOST_FOREACH(fs::path const &p, std::make_pair(it, eod)){
         string corpus_name = p.string();
         wifstream corpus(corpus_name.c_str());
@@ -66,16 +69,6 @@ int main (int argc, char **argv) {
             return -1;
         }
         string dest_cor = corpus_name.substr(17, corpus_name.size());
-        /*Hola soy negro*/
-        dest_cor.erase(dest_cor.size()-1);
-        dest_cor.erase(dest_cor.size()-1);
-        dest_cor.erase(dest_cor.size()-1);
-        dest_cor.erase(dest_cor.size()-1);
-        dest_cor.erase(dest_cor.size()-1);
-        dest_cor.erase(dest_cor.size()-1);
-        dest_cor.erase(dest_cor.size()-1);
-        dest_cor.erase(dest_cor.size()-1);
-        dest_cor.erase(dest_cor.size()-1);
         dest_cor = DEST_PATH + dest_cor + ".utf8.lemma.txt";
         wofstream lemma_c(dest_cor.c_str());
         wstring text;
@@ -84,13 +77,12 @@ int main (int argc, char **argv) {
         list<sentence> ls;
         list<sentence>::iterator it;
         sentence::const_iterator wo;
-        /*Obtener texto por stdin a mientras no haya EOF*/
+        /* Get text using stdin while not EOF */
         while (getline(corpus, text)) {
-            /*Primero tokenizamos la linea*/
             lw=tk.tokenize(text);
-            /*Devolvemos la lista de oraciones de la linea ingresada*/
+            /* Return sentences */
             ls=sp.split(lw, false);
-            /*Analisis morfosintactico y desambiguacion de palabras*/
+            /* Morphosyntactic analysis and sense disambiguation */
             morfo.analyze(ls);
 
             for(it=ls.begin(); it!=ls.end(); it++){
@@ -103,14 +95,14 @@ int main (int argc, char **argv) {
                 }
             }
             lemma_c << endl;
-            /*asegurarse de que el splitter no guarde alguna linea */
+            /* Ensure splitter does not retain any line  */
             ls.clear();
             lw.clear();
             sp.split(lw, true, ls);
         }
         lemma_c.close();
         corpus.close();
-        cout << "Finalizado proceso de "<< dest_cor <<endl;
+        cout << dest_cor << " processed."<<endl;
     }
     return 0;
 }

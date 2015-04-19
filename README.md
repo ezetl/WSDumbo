@@ -8,7 +8,7 @@
 * Dumbo
 * [redsvd](http://code.google.com/p/redsvd/wiki/English) para calcular SVD.
 ##Estructura general
-* transform_corpus.cpp es un programa sencillo usado para el preprocesamiento de datos, es necesario correrlo sobre los corpus sobre los que se quiera trabajar, pues transforma las palabras a sus formas normales (lemas). De esa forma se puede trabajar con Hadoop sin tener de por medio la pesada librería Freeling.
+* transform_corpus.cpp es un programa sencillo usado para el preprocesamiento de datos, es necesario correrlo sobre los corpus sobre los que se quiera trabajar, pues transforma las palabras a sus formas normales (lemas). De esa forma se puede trabajar con Hadoop sin tener que usar de por medio Freeling.
 
 * Para ver los archivos generados por una rutina hadoop:
 ```
