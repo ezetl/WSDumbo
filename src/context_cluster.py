@@ -4,9 +4,10 @@
 import string
 import numpy as np
 SEPARATOR = '\t'
-COOCURR_SVD_V = 'coocurrences_svd.V'
-WORDFILE = 'coocurrences_word_order'
-WORDFILE2 = 'count_20000_wiki.dat'
+COOCURR_SVD_V = '../results/coocurrences_svd.V'
+WORDFILE = '../results/coocurrences_word_order'
+WORDFILE2 = '../results/count_20000_wiki.dat'
+
 
 class Mapper:
     def __init__(self):
@@ -19,7 +20,7 @@ class Mapper:
 
         # self.dims and self.ctxs have the same order
         f = open(WORDFILE2, "r")
-        self.dims = list(set([f.next().strip() for x in xrange(2000)]))
+        self.dims = list(set([f.next().strip() for x in range(2000)]))
         f.close()
 
         f = open(COOCURR_SVD_V, "r")
@@ -31,9 +32,11 @@ class Mapper:
             self.ctxs.append(aux1)
         # Neighbours to check, we're using 50 words window
         self.neighbs = 25
-        self.forbbiden_words = ["el","de","en","y","a","uno","ser","que","se",
-        "su","por","con","para","como","este","o","le","pero","sin","cuando",
-        "alguno","ese","casi","a_partir_de","a_pesar_de","fuera_de"]
+        self.forbbiden_words = ["el", "de", "en", "y", "a", "uno", "ser",
+                                "que", "se", "su", "por", "con", "para",
+                                "como", "este", "o", "le", "pero", "sin",
+                                "cuando", "alguno", "ese", "casi",
+                                "a_partir_de", "a_pesar_de", "fuera_de"]
 
     def __call__(self, key, value):
         # Hadoop passes file lines as 'value', and each line
@@ -79,8 +82,10 @@ class Reducer:
 def runner(job):
     job.additer(Mapper)
 
+
 def starter(prog):
     pass
+
 
 if __name__ == "__main__":
     import dumbo

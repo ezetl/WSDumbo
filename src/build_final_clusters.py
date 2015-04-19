@@ -1,11 +1,11 @@
 import numpy as np
 
-CLUSTERS_CENTROIDS = 'clusters_centroids.dat'
-CONTEXTS = 'contexts.dat'
+CLUSTERS_CENTROIDS = '../results/clusters_centroids.dat'
+CONTEXTS = '../results/contexts.dat'
 
 def load_clusters(filename):
     """
-    Devuelve lista de contexts.
+    Returns clusters list.
     """
     clusters = []
     f = open(filename, "r")
@@ -17,9 +17,6 @@ def load_clusters(filename):
     return clusters
 
 def load_contexts(filename):
-    """
-    Devuelve lista de contexts.
-    """
     ctxt = []
     words = []
     f = open(filename, "r")
@@ -62,7 +59,7 @@ def main():
 
 	print "Process Finished"
 	print "Writing results in a file"
-	f = open("resultados_clusters.dat", "w")
+	f = open("../results/resultados_clusters.dat", "w")
 	for k,v in res.iteritems():
 		f.write(str(k) + "\t" + "\t".join(list(set(v))) + "\n")
 	f.close()

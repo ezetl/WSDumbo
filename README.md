@@ -30,28 +30,33 @@ cat count_20000_wiki.dat | awk '{print "\""$1"\"" ","}'  > out
 5. Extraer los archivos generados por la rutina hadoop:
 ```
 dumbo cat /user/<username>/count/part* -hadoop /usr/local/hadoop | sort -k2,2nr > coocurrences
+```
 
 6. Transformar la matriz de coocurrencias a una matriz de solo numeros (es decir, sacarle las palabras que caracteriza), hacer:
 ```
 cat coocurrences | cut -f2- > coocurrences_nowords.dat
 ```
-7. Para hacer SVD sobre la matriz de coocurrencias (disminicion de dimensiones a 1/20 del original):
+7. SVD sobre la matriz de coocurrencias (disminicion de dimensiones a 1/20 del original):
 ```
 redsvd -i coocurrences_nowords -o coocurrences_svd -r 100  -m SVD
 ```
-* Para correr la rutina que busca los contexts de cada palabra:
+8. Correr la rutina que busca los contexts de cada palabra:
 ```
 dumbo start context.py -hadoop /usr/local/hadoop -input corpus/algo -output count -file coocurrences_svd.V -file count_20000_wiki.dat
 ```
-* Para correr la rutina que arma los clusters
+9. Construir los clusters
 ```
-dumbo start cluster_original.py -hadoop /usr/local/hadoop -input /user/eze/clusters/contexts_noletters.dat -output count -file init_clusters_noletters.dat  -memlimit 2073741824
+/*Codigo de cluster_original adaptado de la version de @tianweidut en https://github.com/tianweidut/CookBook/blob/master/hadoop/kmeans/kmeans.py*/
+dumbo start cluster_original.py -hadoop /usr/local/hadoop -input /path/to/context/matrix.dat -output count -file init_clusters_noletters.dat  -memlimit 2073741824
 ```
 
-* Para correr el context_cluster:
+10. Correr el context_cluster:
 ```
 dumbo start context_cluster.py -hadoop /usr/local/hadoop -input /user/eze/corpus/spanishText_10000_15000.lemma.txt -output clusters -file coocurrences_svd.V -file coocurrences_word_order -file count_20000_wiki.dat  -memlimit 2073741824
 ```
+
+11. (Opcional) clusterer_no_dumbo.py hace, como su nombre lo indica, clusters sin Hadoop de por medio. Ideal para probar que el algoritmo ande secuencialmente.
+
 ##TIPS
 * Acordarse de correr start-dfs.sh y luego start-mapred.sh.
 * Si el datanode no inició correctamente, probar con:

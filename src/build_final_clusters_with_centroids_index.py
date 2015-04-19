@@ -4,9 +4,6 @@ CLUSTERS_CENTROIDS = 'clusters_centroids.dat'
 CONTEXTS = 'contexts.dat'
 
 def load_clusters(filename):
-    """
-    Devuelve lista de contexts.
-    """
     clusters = []
     f = open(filename, "r")
     lines = f.read().splitlines()
@@ -17,9 +14,6 @@ def load_clusters(filename):
     return clusters
 
 def load_contexts(filename):
-    """
-    Devuelve lista de contexts.
-    """
     ctxt = []
     words = []
     f = open(filename, "r")
@@ -59,7 +53,7 @@ def main():
 
 	print "Process Finished"
 	print "Writing results in a file"
-	f = open("resultados_clusters_con_indices.dat", "w")
+	f = open("../results/resultados_clusters_con_indices.dat", "w")
 	for k,v in res:
 		s = ""
 		for elem in v:
