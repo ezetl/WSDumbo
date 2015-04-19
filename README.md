@@ -7,29 +7,35 @@
 * Freeling (para preprocesamiento del corpus)
 * Dumbo
 * [redsvd](http://code.google.com/p/redsvd/wiki/English) para calcular SVD.
-##Estructura general
-* transform_corpus.cpp es un programa sencillo usado para el preprocesamiento de datos, es necesario correrlo sobre los corpus sobre los que se quiera trabajar, pues transforma las palabras a sus formas normales (lemas). De esa forma se puede trabajar con Hadoop sin tener que usar de por medio Freeling.
+##Workflow
+1. transform_corpus.cpp es un programa sencillo usado para el preprocesamiento de datos, es necesario correrlo sobre los corpus sobre los que se quiera trabajar, pues transforma las palabras a sus formas normales (lemas). De esa forma se puede trabajar con Hadoop sin tener que usar de por medio Freeling.
 
 * Para ver los archivos generados por una rutina hadoop:
 ```
 dumbo cat /user/eze/count/part* -hadoop /usr/local/hadoop | sort -k2,2nr > coocurrences
 ```
 
-* Para correr el coocur1
+2. (opcional) Seleccionar un fragmento de todo lo analizado para experimentar. Notar que -input debe tener el output generado en el preprocesamiento (se pueden unir todos los outputs con cat, o simplemente usar alguno de los archivos)
 ```
 /*Reemplazar input por *spanish* para leer de todos los archivos del corpus*/
 dumbo start coocur1.py -hadoop /usr/local/hadoop -input corpus/spanishText_480000_485000.lemma.txt -output count -memlimit 1073741824 -file count_20000_wiki.dat
 ```
-* Si no puede leer el archivo de palabras (words), este comando lo modifica para
+3. Si no puede leer el archivo de palabras (words), este comando lo modifica para
 poder definirlo como una lista en python directamente (bastante pedestre, pero evita cargar un archivo externo):
 ```
-cat count_20000_wiki.dat | awk '{print "\""$1"\"" ","}'  > hola
+cat count_20000_wiki.dat | awk '{print "\""$1"\"" ","}'  > out 
 ```
-* Para transformar la matriz de coocurrencias a una matriz de solo numeros (es decir, sacarle las palabras que caracteriza), hacer:
+4. Correr coocur.py para construir la matriz de coocurrencias. El input debe ser el archivo generado en el punto 3.
+
+5. Extraer los archivos generados por la rutina hadoop:
 ```
-cat coocurrences | cut -f2- > coocurrences_nowords
+dumbo cat /user/<username>/count/part* -hadoop /usr/local/hadoop | sort -k2,2nr > coocurrences
+
+6. Transformar la matriz de coocurrencias a una matriz de solo numeros (es decir, sacarle las palabras que caracteriza), hacer:
 ```
-* Para hacer SVD sobre la matriz de coocurrencias (disminicion de dimensiones a 1/20 del original):
+cat coocurrences | cut -f2- > coocurrences_nowords.dat
+```
+7. Para hacer SVD sobre la matriz de coocurrencias (disminicion de dimensiones a 1/20 del original):
 ```
 redsvd -i coocurrences_nowords -o coocurrences_svd -r 100  -m SVD
 ```

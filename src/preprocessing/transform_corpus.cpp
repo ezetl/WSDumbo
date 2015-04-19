@@ -102,7 +102,6 @@ int main (int argc, char **argv) {
         }
         lemma_c.close();
         corpus.close();
-        cout << dest_cor << " processed."<<endl;
     }
     return 0;
 }
