@@ -51,7 +51,6 @@ def main():
 	for i, c in enumerate(contexts):
 		w = words[i]
 		index = nearest_cluster_id(centroids, c)
-		#print index, w
 		if res.get(str(index), 0) == 0:
 			res[str(index)] = [w]
 		else:

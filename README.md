@@ -32,7 +32,7 @@ cat count_20000_wiki.dat | awk '{print "\""$1"\"" ","}'  > out
 dumbo cat /user/<username>/count/part* -hadoop /usr/local/hadoop | sort -k2,2nr > coocurrences
 ```
 
-6. Transformar la matriz de coocurrencias a una matriz de solo numeros (es decir, sacarle las palabras que caracteriza), hacer:
+6. Transformar la matriz de coocurrencias a una matriz de solo numeros (es decir, borrar las palabras que caracteriza):
 ```
 cat coocurrences | cut -f2- > coocurrences_nowords.dat
 ```
@@ -40,20 +40,16 @@ cat coocurrences | cut -f2- > coocurrences_nowords.dat
 ```
 redsvd -i coocurrences_nowords -o coocurrences_svd -r 100  -m SVD
 ```
-8. Correr la rutina que busca los contexts de cada palabra:
+8. Correr la rutina que genera los contexts de cada palabra:
 ```
-dumbo start context.py -hadoop /usr/local/hadoop -input corpus/algo -output count -file coocurrences_svd.V -file count_20000_wiki.dat
+dumbo start contexts_generator.py -hadoop /usr/local/hadoop -input corpus/algo/lemmatizado.txt -output contexts -file coocurrences_svd.V -file coocurrences_word_order -file count_20000_wiki.dat
 ```
-9. Construir los clusters
+9. Usar context_clustering_hadoop.py para generar los clusters que representen sentidos de cada palabra:
 ```
-/*Codigo de cluster_original adaptado de la version de @tianweidut en https://github.com/tianweidut/CookBook/blob/master/hadoop/kmeans/kmeans.py*/
-dumbo start cluster_original.py -hadoop /usr/local/hadoop -input /path/to/context/matrix.dat -output count -file init_clusters_noletters.dat  -memlimit 2073741824
+/*Codigo de este modulo adaptado de la version de @tianweidut en https://github.com/tianweidut/CookBook/blob/master/hadoop/kmeans/kmeans.py*/
+dumbo start context_clustering_hadoop.py -hadoop /usr/local/hadoop -input /path/to/context/matrix.dat -output count -file init_clusters_noletters.dat  -memlimit 2073741824
 ```
-
-10. Correr el context_cluster:
-```
-dumbo start context_cluster.py -hadoop /usr/local/hadoop -input /user/eze/corpus/spanishText_10000_15000.lemma.txt -output clusters -file coocurrences_svd.V -file coocurrences_word_order -file count_20000_wiki.dat  -memlimit 2073741824
-```
+10. Correr build_final_clusters.py  para crear un archivo que muestre como se agrupan las palabras en los clusters.
 
 11. (Opcional) clusterer_no_dumbo.py hace, como su nombre lo indica, clusters sin Hadoop de por medio. Ideal para probar que el algoritmo ande secuencialmente.
 

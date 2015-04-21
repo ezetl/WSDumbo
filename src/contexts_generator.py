@@ -10,6 +10,7 @@ WORDFILE2 = '../results/count_20000_wiki.dat'
 
 
 class Mapper:
+
     def __init__(self):
         # We only want to build windows with relevant words
         # The words file ONLY contains words, not counts nor
@@ -42,15 +43,16 @@ class Mapper:
         # Hadoop passes file lines as 'value', and each line
         # is a sentence, so this is ok.
         line = str(value).strip()
-        line = line.translate(string.maketrans("",""), string.punctuation)
+        line = line.translate(string.maketrans("", ""), string.punctuation)
         words = line.split()
         context = np.zeros(shape=(100,), dtype=np.float32)
-        can_process = len(words)>0
+        can_process = len(words) > 0
         if can_process:
             for i, w in enumerate(words):
                 if w in self.words and w not in self.forbbiden_words:
-                    right = words[i+1 : min(i+self.neighbs, len(words)-1)+1]
-                    left = words[max(0, i-self.neighbs) : i]
+                    right = words[
+                        i + 1: min(i + self.neighbs, len(words) - 1) + 1]
+                    left = words[max(0, i - self.neighbs): i]
                     for wo in right:
                         if wo in self.dims:
                             context += self.ctxs[self.dims.index(wo)]
@@ -65,18 +67,25 @@ class Mapper:
             pass
 
 
-class Reducer:
-    def __call__(self, key, values):
-        from nltk.cluster import GAAClusterer
+# I leave this dead code that makes the clustering of different meanings of one
+# word according to its contexts. This is better done in
+# context_clustering_hadoop.py, taking advantage of the distributed arch.
+# Hadoop provides.
 
-        ctxs = [np.array(elem, dtype=np.float32) for elem in values]
-        word = key
 
-        clusterer = GAAClusterer()
-        clusters = clusterer.cluster(ctxs, True)
-
-        for elem in clusters._centroids:
-            yield word, centroid
+#class Reducer:
+#
+#    def __call__(self, key, values):
+#        from nltk.cluster import GAAClusterer
+#
+#        ctxs = [np.array(elem, dtype=np.float32) for elem in values]
+#        word = key
+#
+#        clusterer = GAAClusterer()
+#        clusters = clusterer.cluster(ctxs, True)
+#
+#        for centroid in clusters._centroids:
+#            yield word, centroid
 
 
 def runner(job):
@@ -89,4 +98,4 @@ def starter(prog):
 
 if __name__ == "__main__":
     import dumbo
-    dumbo.main(runner,starter)
+    dumbo.main(runner, starter)
